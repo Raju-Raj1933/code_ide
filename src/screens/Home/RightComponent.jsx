@@ -1,7 +1,12 @@
-import React from 'react'
+import React, {useContext} from 'react'
 import styled from 'styled-components'
 import { IoTrashOutline } from 'react-icons/io5'
 import { BiEditAlt } from 'react-icons/bi'
+// import logo from '../../assets/logo-small.png'
+
+import { ModalContext } from '../../context/ModalContext'
+import { PlaygroundContext } from '../../context/PlaygroundContext'
+import { useNavigate } from 'react-router-dom'
 
 const StyledRightComponent = styled.div`
     position: absolute;
@@ -27,7 +32,7 @@ const Heading = styled.h3`
   }
 `
 
-const AddFolder = styled.div`
+const AddButton = styled.div`
     font-size: 1rem;
     border-radius: 30px;
     color: black;
@@ -83,56 +88,91 @@ const Logo = styled.img`
 `
 
 const RightComponent = () => {
+  const navigate = useNavigate();
+  const { openModal } = useContext(ModalContext);
+  const {folders, deleteFolder, deleteCard} =  useContext(PlaygroundContext);
       return (
         <StyledRightComponent>
           <Header>
             <Heading size="large">
               My <span>Playground</span>
             </Heading>
-            <AddFolder> <span>+</span> New Folder</AddFolder>
-          </Header>
-          <hr />
-    
-          {
-            Array.from({ length: 4 }).map(() => (
-              <FolderCard>
-                <Header>
-                  <Heading size="small">
-                    Folder Name
-                  </Heading>
-                  <FolderIcons>
-                    <IoTrashOutline />
-                    <BiEditAlt />
-                    <AddFolder><span>+</span> New Playground</AddFolder>
-                  </FolderIcons>
-                </Header>
-    
-                <PlayGroundCards>
-                  {
-                    Array.from({ length: 4 }).map(() => (
-                      <Card>
-                        <CardContainer>
-                          {<Logo src="https://github.com/Vishal-raj-1/code_deck/blob/main/src/assets/logo.png?raw=true" alt="img" />}
-                          {/* <Logo src={logo} /> */}
-                          <CardContent>
-                            <p>Playground Name</p>
-                            <p>Language: C++</p>
-                          </CardContent>
-                        </CardContainer>
-                        <FolderIcons>
-                          <IoTrashOutline />
-                          <BiEditAlt />
-                        </FolderIcons>
-                      </Card>
-                    ))
-                  }
-                </PlayGroundCards>
-              </FolderCard>
-            ))
+            <AddButton onClick={() => openModal({
+          show: true,
+          modalType: 1,
+          identifiers: {
+            folderId: "",
+            cardId: "",
           }
-        </StyledRightComponent>
-      )
-    }
+        })}> <span>+</span> New Folder</AddButton>
+      </Header>
+      <hr />
+
+      {
+        Object.entries(folders).map(([folderId, folder]) => (
+          <FolderCard key={folderId}>
+            <Header>
+              <Heading size="small">
+                {folder.title}
+              </Heading>
+              <FolderIcons>
+              <IoTrashOutline onClick={() => deleteFolder(folderId)} />
+                <BiEditAlt onClick={() => openModal({
+                  show: true,
+                  modalType: 4,
+                  identifiers: {
+                    folderId: folderId,
+                    cardId: "",
+                  }
+                })} />
+                <AddButton onClick={() => openModal({
+                  show: true,
+                  modalType: 2,
+                  identifiers: {
+                    folderId: folderId,
+                    cardId: "",
+                  }
+                })}><span>+</span> New Playground</AddButton>  
+              </FolderIcons>
+            </Header>
+
+            <PlayGroundCards>
+              {
+                Object.entries(folder['playgrounds']).map(([playgroundId, playground]) => (
+                  <Card key={playgroundId} onClick={() => {
+                    navigate(`/playground/${folderId}/${playgroundId}`)
+                  }}>
+                    <CardContainer>
+                      {/* <Logo src={logo} /> */}
+                      <img src="https://raw.githubusercontent.com/Vishal-raj-1/code_deck/eaa3d3758b430dc1bef9082c93cb9b4413255248/src/assets/logo-small.png" alt="" />
+                      <CardContent>
+                        <p>{playground.title}</p>
+                        <p>Language: {playground.language}</p>
+                      </CardContent>
+                    </CardContainer>
+                    <FolderIcons onClick={(e) => {
+                      e.stopPropagation(); 
+                    }}>
+                      <IoTrashOutline onClick={() => deleteCard(folderId, playgroundId)} />
+                      <BiEditAlt onClick={() => openModal({
+                        show: true,
+                        modalType: 5,
+                        identifiers: {
+                          folderId: folderId,
+                          cardId: playgroundId,
+                        }
+                      })} />
+                    </FolderIcons>
+                  </Card>
+                ))  
+              }
+            </PlayGroundCards>
+          </FolderCard>
+        ))
+      }
+    </StyledRightComponent>
+  )
+}
     
-    export default RightComponent;
+  export default RightComponent;
     

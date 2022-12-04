@@ -1,5 +1,16 @@
-import NewFolder from './NewFolder';
-import NewPlayground from './NewPlayground'
-import NewPlaygroundAndFolder from './NewPlaygroundAndFolder'
+import React, { useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 
-export  { NewFolder, NewPlayground, NewPlaygroundAndFolder };
+const Error404 = () => {
+  const navigate = useNavigate();
+  useEffect(() => {
+    setTimeout(() => {
+      navigate('/');
+    }, 3000)
+  }, [])
+  return (
+    <div>No Page Found, Redirecting to home page</div>
+  )
+}
+
+export default Error404
